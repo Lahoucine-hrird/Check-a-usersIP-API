@@ -1,6 +1,7 @@
 <?php
 
 use GuzzleHttp\Psr7\Request;
+use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 
@@ -19,28 +20,81 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/testip', function () {
-    $ipr=0;
+Route::get('/testip/{id}', function ($id) {
+    // $ipr="161.176.52.192";
 //    $respons=Http::withoutVerifying()->get('https://api.iplegit.com/full',[
 //     'ip'=>"161.176.52.192",
 //     ]);
     
-    $clientIP = request()->ip();
+    // $clientIP = request()->ip();
            $respons=Http::withoutVerifying()->get('https://api.iplegit.com/full',[
-            'ip'=>$clientIP ,
+            'ip'=>$id ,
             ]);    
-    dd($respons->body());
+            $d=$respons->json();
+            
+            $data='
+            <div class="section-title">
+            <h2>Your result</h2>
+          </div>
+          
+            <div class="col-lg-12 d-flex align-items-stretch">
+            <div class="info">';
+
+            $data.='<div class="address">
+            <i class="icofont-focus"></i>
+            
+             <h4>IP Address is :</h4>
+             <p>'.$d["ip"].'</p>
+           </div>';
+
+              $data.='<div class="address">
+              <i class="icofont-megaphone"></i> 
+               <h4>This is considered a:</h4>
+                ';
+                 if($d["bad"]=="true")
+                 $data.='<p style="color:#d83636">Bad IP</p>';
+                 else
+                 $data.='<p style="color:#24b7a4">Good IP</p>';
+
+                 $data.=' 
+              </div>';
+
+              
+              $data.='<div class="address">
+              <i class="icofont-navigation"></i>
+               <h4>Country is :</h4>
+                <p>'. $d["countryName"].'</p>
+              </div>';
+
+              $data.='<div class="address">
+              <i class="icofont-tack-pin"></i>
+               <h4>City is :</h4>
+                <p>'. $d["city"].'</p>
+              </div>';
+
+              $data.='<div class="address">
+              <i class="icofont-hard-disk"></i>
+              <h4>Type :</h4>
+               <p>'. $d["type"].'</p>
+             </div>
+             ';
+              $data.='
+            </div>';
+            //  dd($d),$d["latitude"], $d["longitude"];
+            return Response($data);
+
 
 });
 
 
 
 
-Route::get('exemplePost',function()
+Route::get('/IpTest/{id}',function($userId)
 {
-    $response=Http::withoutVerifying()->post('https://jsonplaceholder.typicode.com/posts',[
-        'userId'=>123,
+    $response=Http::withoutVerifying()->post('https://api.iplegit.com/full',[
+        'id'=>$userId,
     ]);
+    return $response->body();
    dd($response->json());
 });
 
